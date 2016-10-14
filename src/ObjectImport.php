@@ -4,6 +4,7 @@ namespace Bokbasen\Metadata;
 use Bokbasen\Http\HttpRequestOptions;
 use Bokbasen\Metadata\Exceptions\BokbasenMetadataAPIException;
 use Http\Client\HttpClient;
+
 /**
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -64,8 +65,10 @@ class ObjectImport extends BaseClient
         
         $response = $this->httpClient->sendRequest($request);
         
-        if ($response->getStatusCode() != 201) {
-            throw new BokbasenMetadataAPIException('Import failed for ISBN '.$isbn. 'Error from server: ' . (string) $response->getBody());
+        if ($this->needReAuthentication($response)) {
+            $this->importObjectData($fileContent, $isbn, $type, $productOwnerId);
+        } elseif ($response->getStatusCode() != 201) {
+            throw new BokbasenMetadataAPIException('Import failed for ISBN ' . $isbn . 'Error from server: ' . (string) $response->getBody());
         }
     }
 
@@ -79,7 +82,7 @@ class ObjectImport extends BaseClient
      */
     public function importFromPath($pathToFile, $isbn, $type, $productOwnerId = null)
     {
-        return $this->importObjectData(file_get_contents($pathToFile), $isbn, $type, $productOwnerId);
+        return $this->importObjectData(@file_get_contents($pathToFile), $isbn, $type, $productOwnerId);
     }
 
     /**
