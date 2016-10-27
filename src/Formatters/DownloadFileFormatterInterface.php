@@ -1,8 +1,5 @@
-<?php
-namespace Bokbasen\Metadata;
-
-use Bokbasen\Auth\Login;
-use Http\Client\HttpClient;
+<?php 
+namespace Bokbasen\Metadata\Formatters;
 /**
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -18,28 +15,10 @@ use Http\Client\HttpClient;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * Shared class for all Metadata SDK clients
+ * Interface to implement your own file name formatters, so that you can customize how downloaded files are stored on disk
  *
  * @license https://opensource.org/licenses/MIT
  */
-abstract class BaseClient
-{
-    use \Bokbasen\Http\HttpMethodsTrait;
-
-    const URL_PROD = 'https://api.boknett.no/metadata/';
-
-    const URL_TEST = 'https://api.boknett.webbe.no/metadata/';
-
-    const AFTER_PARAMETER_DATE_FORMAT = 'YmdHis';
-    /**
-     *
-     * @param \Bokbasen\Auth\Login $auth            
-     * @param string $baseUrl            
-     */
-    public function __construct(Login $auth, $url = self::URL_PROD, HttpClient $httpClient = null)
-    {
-        $this->auth = $auth;
-        $this->url = $url;
-        $this->setHttpClient($httpClient);
-    }
+interface DownloadFileFormatterInterface{
+    public function getFilename(\SimpleXMLElement $objectReportXml);
 }

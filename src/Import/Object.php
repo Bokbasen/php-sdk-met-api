@@ -1,6 +1,7 @@
 <?php
-namespace Bokbasen\Metadata;
+namespace Bokbasen\Metadata\Import;
 
+use Bokbasen\Metadata\BaseClient;
 use Bokbasen\Http\HttpRequestOptions;
 use Bokbasen\Metadata\Exceptions\BokbasenMetadataAPIException;
 use Http\Client\HttpClient;
@@ -25,7 +26,7 @@ use Http\Client\HttpClient;
  * @link https://bokbasen.jira.com/wiki/display/api/Import+Service#ImportService-ObjectImport
  * @license https://opensource.org/licenses/MIT
  */
-class ObjectImport extends BaseClient
+class Object extends BaseClient
 {
 
     const TYPE_PRODUCT_IMAGE = 'productimage';
@@ -43,6 +44,8 @@ class ObjectImport extends BaseClient
     /**
      * Import object based on binary data, $productOwnerId is in general not needed and you need special API permissions to use this parameter
      *
+     * @todo see how this can work with streams
+     *      
      * @param string $fileContent            
      * @param string $isbn            
      * @param string $type            
@@ -74,6 +77,8 @@ class ObjectImport extends BaseClient
 
     /**
      * Same as importObjectData except that you can specify a path to the file to import
+     *
+     * @todo see how this can work with streams
      *
      * @param string $pathToFile            
      * @param string $isbn            
