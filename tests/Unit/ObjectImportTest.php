@@ -50,8 +50,8 @@ class ObjectImportTest extends \PHPUnit_Framework_TestCase
         
         $client->addResponse($mockedResponse);
         
-        $objectImportSdk = new \Bokbasen\Metadata\ObjectImport($authMoch, null, $client);
-        $objectImportSdk->importObjectData('someData', '97888844545', \Bokbasen\Metadata\ObjectImport::TYPE_PRODUCT_IMAGE);
+        $objectImportSdk = new \Bokbasen\Metadata\Import\Object($authMoch, null, $client);
+        $objectImportSdk->importObjectData('someData', '97888844545', \Bokbasen\Metadata\Import\Object::TYPE_PRODUCT_IMAGE);
         // No exception thrown, all ok
     }
 
@@ -68,8 +68,8 @@ class ObjectImportTest extends \PHPUnit_Framework_TestCase
         
         $client->addResponse($mockedResponse);
         
-        $objectImportSdk = new \Bokbasen\Metadata\ObjectImport($authMoch, null, $client);
-        $objectImportSdk->importObjectData('someData', '97888844545', \Bokbasen\Metadata\ObjectImport::TYPE_PRODUCT_IMAGE);
+        $objectImportSdk = new \Bokbasen\Metadata\Import\Object($authMoch, null, $client);
+        $objectImportSdk->importObjectData('someData', '97888844545', \Bokbasen\Metadata\Import\Object::TYPE_PRODUCT_IMAGE);
     }
     
     public function testFileDoesNotExistInput()
@@ -85,7 +85,7 @@ class ObjectImportTest extends \PHPUnit_Framework_TestCase
     
         $client->addResponse($mockedResponse);
     
-        $objectImportSdk = new \Bokbasen\Metadata\ObjectImport($authMoch, null, $client);
-        $objectImportSdk->importFromPath('fileThatDoesNotExists.jpg', '97888844545', \Bokbasen\Metadata\ObjectImport::TYPE_PRODUCT_IMAGE);
+        $objectImportSdk = new \Bokbasen\Metadata\Import\Object($authMoch, null, $client);
+        $objectImportSdk->importFromPath('fileThatDoesNotExists.jpg', '97888844545', \Bokbasen\Metadata\Import\Object::TYPE_PRODUCT_IMAGE);
     }
 }

@@ -42,11 +42,10 @@ class Object extends BaseClient
     ];
 
     /**
-     * Import object based on binary data, $productOwnerId is in general not needed and you need special API permissions to use this parameter
+     * Import object based on binary data (as string or stream), $productOwnerId is in general not needed and you need special API permissions to use this parameter
      *
-     * @todo see how this can work with streams
-     *      
-     * @param string $fileContent            
+     *
+     * @param StreamInterface|resource|string $fileContent            
      * @param string $isbn            
      * @param string $type            
      * @param string $productOwnerId            
@@ -54,10 +53,6 @@ class Object extends BaseClient
      */
     public function importObjectData($fileContent, $isbn, $type, $productOwnerId = null)
     {
-        if (empty($fileContent)) {
-            throw new BokbasenMetadataAPIException('No object data provided');
-        }
-        
         if (is_null($productOwnerId)) {
             $url = sprintf($this->url . 'import/object/%s/%s/', $isbn, $type);
         } else {
@@ -78,8 +73,7 @@ class Object extends BaseClient
     /**
      * Same as importObjectData except that you can specify a path to the file to import
      *
-     * @todo see how this can work with streams
-     *
+     *      
      * @param string $pathToFile            
      * @param string $isbn            
      * @param string $type            
@@ -87,7 +81,12 @@ class Object extends BaseClient
      */
     public function importFromPath($pathToFile, $isbn, $type, $productOwnerId = null)
     {
-        return $this->importObjectData(@file_get_contents($pathToFile), $isbn, $type, $productOwnerId);
+        $resource = @fopen($pathToFile, 'r');
+        
+        if ($resource === false) {
+            throw new BokbasenMetadataAPIException('could not open: ' . $pathToFile);
+        }
+        return $this->importObjectData($resource, $isbn, $type, $productOwnerId);
     }
 
     /**

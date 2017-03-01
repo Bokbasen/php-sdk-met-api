@@ -1,7 +1,6 @@
 <?php
 namespace Bokbasen\Metadata\Export;
 
-use Bokbasen\Metadata\BaseClient;
 use Bokbasen\Metadata\Exceptions\BokbasenMetadataAPIException;
 use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
@@ -28,7 +27,7 @@ use Bokbasen\Metadata\Formatters\DefaultDownloadFileFormatter;
  * @link https://bokbasen.jira.com/wiki/display/api/Objects
  * @license https://opensource.org/licenses/MIT
  */
-class Object extends BaseClient
+class Object extends ExportBase
 {
 
     const OBJECT_TYPE_AUDIO_SAMPLE = 'ly';
@@ -41,12 +40,13 @@ class Object extends BaseClient
 
     const MAX_PAGE_SIZE = 5000;
 
+    const PATH = 'export/object';
+
     /**
-     * Last next token returned from the server
      *
-     * @var string
+     * @var array
      */
-    protected $lastNextToken;
+    protected $downloadedIsbns = [];
 
     /**
      * Download files based on next parameter, downloads files for the next page in the object report and return true/false depending on if the next report page had data or not
@@ -61,7 +61,7 @@ class Object extends BaseClient
      */
     public function downloadNext($nextToken, array $objectsTypesToDownload, $targetPath, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, $pageSize = self::MAX_PAGE_SIZE)
     {
-        $response = $this->httpClient->sendRequest($this->createRequest($nextToken, null, $pageSize));
+        $response = $this->httpClient->sendRequest($this->createRequest($nextToken, null, $pageSize, self::PATH));
         
         $status = $this->downloadObjects($response, $objectsTypesToDownload, $targetPath, $isbnFilter, $filenameFormatter);
         
@@ -82,26 +82,21 @@ class Object extends BaseClient
      *
      * @return string
      */
-    public function downloadAfter(\DateTime $afterDate, array $objectsTypesToDownload, $targetPath, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, $pageSize = self::MAX_PAGE_SIZE)
+    public function downloadAfter(\DateTime $afterDate, array $objectsTypesToDownload, $targetPath, $downloadAllPages = true, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, $pageSize = self::MAX_PAGE_SIZE)
     {
-        $response = $this->httpClient->sendRequest($this->createRequest(null, $afterDate, $pageSize));
+        $response = $this->httpClient->sendRequest($this->createRequest(null, $afterDate, $pageSize, self::PATH));
         $morePages = $this->downloadObjects($response, $objectsTypesToDownload, $targetPath, $isbnFilter, $filenameFormatter);
         $this->lastNextToken = $response->getHeaderLine('Next');
         
-        while ($morePages) {
-            $morePages = $this->downloadNext($this->lastNextToken, $objectsTypesToDownload, $targetPath, $isbnFilter, $filenameFormatter, $pageSize);
+        if ($morePages && $downloadAllPages) {
+            while ($morePages) {
+                $morePages = $this->downloadNext($this->lastNextToken, $objectsTypesToDownload, $targetPath, $isbnFilter, $filenameFormatter, $pageSize);
+                
+                if (! empty($isbnFilter) && count($isbnFilter) == count($this->downloadedIsbns)) {
+                    $morePages = false;
+                }
+            }
         }
-        
-        return $this->lastNextToken;
-    }
-
-    /**
-     * Get the last next token returned from the API
-     *
-     * @return string
-     */
-    public function getLastNextToken()
-    {
         return $this->lastNextToken;
     }
 
@@ -139,7 +134,7 @@ class Object extends BaseClient
             $targetFilename = $filenameFormatter->getFilename($object);
             $url = (string) $object->REFERENCE;
             
-            // @todo this will put entire file into memory, replace with streams
+            // @todo this will put entire file into memory, replace with streams?
             $request = $this->getMessageFactory()->createRequest('GET', $url, $this->makeHeadersArray($this->auth));
             $response = $this->httpClient->sendRequest($request);
             
@@ -147,35 +142,9 @@ class Object extends BaseClient
             if ($status === false) {
                 throw new BokbasenMetadataAPIException('Could not write file: ' . $targetPath . $targetFilename);
             }
+            $this->downloadedIsbns[] = $object->ISBN13;
         }
         
         return true;
-    }
-
-    /**
-     * Create request object for the object report
-     *
-     * @param string $nextToken            
-     * @param \DateTime $afterDate            
-     * @param int $pageSize            
-     *
-     * @return \Psr\Http\Message\RequestInterface
-     */
-    protected function createRequest($nextToken, \DateTime $afterDate = null, $pageSize)
-    {
-        $url = $this->url . 'export/object';
-        $parameters = [
-            'pagesize' => (int) $pageSize
-        ];
-        
-        if (! is_null($nextToken)) {
-            $parameters['next'] = $nextToken;
-        } elseif (! is_null($afterDate)) {
-            $parameters['after'] = $afterDate->format(self::AFTER_PARAMETER_DATE_FORMAT);
-        }
-        $url .= '?' . http_build_query($parameters);
-        $request = $this->getMessageFactory()->createRequest('GET', $url, $this->makeHeadersArray($this->auth));
-        
-        return $request;
     }
 }
