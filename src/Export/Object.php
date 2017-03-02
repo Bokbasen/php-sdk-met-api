@@ -52,14 +52,14 @@ class Object extends ExportBase
      * Download files based on next parameter, downloads files for the next page in the object report and return true/false depending on if the next report page had data or not
      *
      * @param string $nextToken            
-     * @param array $objectsTypesToDownload            
      * @param string $targetPath            
+     * @param array $objectsTypesToDownload            
      * @param array $isbnFilter            
      * @param DownloadFileFormatterInterface $filenameFormatter            
      * @param int $pageSize            
      * @return boolean
      */
-    public function downloadNext($nextToken, array $objectsTypesToDownload, $targetPath, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, $pageSize = self::MAX_PAGE_SIZE)
+    public function downloadNext($nextToken, $targetPath, array $objectsTypesToDownload = [], array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, $pageSize = self::MAX_PAGE_SIZE)
     {
         $response = $this->httpClient->sendRequest($this->createRequest($nextToken, null, $pageSize, self::PATH));
         
@@ -74,15 +74,15 @@ class Object extends ExportBase
      * Download all objects after a certain date, will return next token for last page
      *
      * @param \DateTime $afterDate            
-     * @param array $objectsTypesToDownload            
      * @param string $targetPath            
+     * @param array $objectsTypesToDownload            
      * @param array $isbnFilter            
      * @param DownloadFileFormatterInterface $filenameFormatter            
      * @param int $pageSize            
      *
      * @return string
      */
-    public function downloadAfter(\DateTime $afterDate, array $objectsTypesToDownload, $targetPath, $downloadAllPages = true, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, $pageSize = self::MAX_PAGE_SIZE)
+    public function downloadAfter(\DateTime $afterDate, $targetPath, array $objectsTypesToDownload = [], $downloadAllPages = true, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, $pageSize = self::MAX_PAGE_SIZE)
     {
         $response = $this->httpClient->sendRequest($this->createRequest(null, $afterDate, $pageSize, self::PATH));
         $morePages = $this->downloadObjects($response, $objectsTypesToDownload, $targetPath, $isbnFilter, $filenameFormatter);
@@ -127,7 +127,7 @@ class Object extends ExportBase
         foreach ($xml->OBJECT as $object) {
             
             // skip files based on isbn filter and object types list
-            if (! in_array($object->TYPE, $objectsTypesToDownload) || (! empty($isbnFilter) && ! in_array($object->ISBN13, $isbnFilter))) {
+            if ((! empty($objectsTypesToDownload) && ! in_array($object->TYPE, $objectsTypesToDownload)) || (! empty($isbnFilter) && ! in_array($object->ISBN13, $isbnFilter))) {
                 continue;
             }
             
