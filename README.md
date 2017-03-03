@@ -18,11 +18,22 @@ All code examples below assumes that this variable exists:
 
 ##ONIX Exports
 
+###Create ONIX Export client
+
+Use auth object and set your subscription when creating the export object (subscription is based on your contract with Bokbasen. basic, extended or school)
+
+```php
+<?php
+use Bokbasen\Metadata\Export\Onix;
+$onixClient = new Onix($auth, Onix::URL_PROD, Onix::SUBSCRIPTION_EXTENDED);
+?>
+```
+
+
 ###Get ONIX for single ISBN
 ```php
 <?php
-$onixClient = new \Bokbasen\Metadata\Export\Onix($auth);
-$onixAsString = $onixClient->getByISBN($isbn);
+$onixAsString = $onixClient->getByISBN('9788276749557');
 ?>
 ```
 
@@ -31,8 +42,7 @@ This is only used when you do not have a valid next token. Given filename will b
 
 ```php
 <?php
-$onixClient = new \Bokbasen\Metadata\Export\Onix($auth);
-$nextToken = $onixClient->downloadAfter(new \DateTime('2017-10-01'),'onix.xml');
+$nextToken = $onixClient->downloadAfter(new \DateTime('2017-01-01'),'/onixFolder/');
 //Save next token for later use
 ?>
 ```
@@ -42,12 +52,10 @@ Use $nextToken to get all changes since last execution
 
 ```php
 <?php
-$onixClient = new \Bokbasen\Metadata\Export\Onix($auth);
-
 //Loop to get all pages
 $morePages = true;
 while($morePages){
-	$morePages = $onixClient->downloadNext($nextToken,'onix.xml');
+	$morePages = $onixClient->downloadNext($nextToken,'/onixFolder/');
 	$nextToken = $onixClient->getLastNextToken();
 }
 
@@ -64,7 +72,6 @@ This is only used when you do not have a valid next token.
 
 ```php
 <?php
-$objectClient = new \Bokbasen\Metadata\Export\Object($auth);
 $nextToken = $objectClient->downloadAfter(new \DateTime('2017-10-01'),'/pathForObjects/');
 //Save next token for later use
 ?>
@@ -75,9 +82,7 @@ Use $nextToken to get all changes since last execution
 
 ```php
 <?php
-$objectClient = new \Bokbasen\Metadata\Export\Object($auth);
-
-//Loop to get all pages
+//Loop to get all pages, each page will be stored as separate file
 $morePages = true;
 while($morePages){
 	$morePages = $onixClient->downloadNext($nextToken,'/pathForObjects/');
@@ -91,8 +96,6 @@ while($morePages){
 ###Additional filters
 ```php
 <?php
-$objectClient = new \Bokbasen\Metadata\Export\Object($auth);
-
 //Only download spesific types of objects
 $nextToken = $objectClient->downloadAfter(new \DateTime('2017-10-01'),'/pathForObjects/',[\Bokbasen\Metadata\Export\Object::OBJECT_TYPE_AUDIO_SAMPLE,\Bokbasen\Metadata\Export\Object::OBJECT_COVER_IMAGE_SMALL]);
 
