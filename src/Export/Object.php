@@ -90,7 +90,7 @@ class Object extends ExportBase
         
         if ($morePages && $downloadAllPages) {
             while ($morePages) {
-                $morePages = $this->downloadNext($this->lastNextToken, $objectsTypesToDownload, $targetPath, $isbnFilter, $filenameFormatter, $pageSize);
+                $morePages = $this->downloadNext($this->lastNextToken, $targetPath, $objectsTypesToDownload, $isbnFilter, $filenameFormatter, $pageSize);
                 
                 if (! empty($isbnFilter) && count($isbnFilter) == count($this->downloadedIsbns)) {
                     $morePages = false;

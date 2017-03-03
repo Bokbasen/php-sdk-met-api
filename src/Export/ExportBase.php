@@ -2,6 +2,8 @@
 namespace Bokbasen\Metadata\Export;
 
 use Bokbasen\Metadata\BaseClient;
+use Bokbasen\Auth\Login;
+use Http\Client\HttpClient;
 
 /**
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -33,6 +35,29 @@ abstract class ExportBase extends BaseClient
     protected $lastNextToken;
 
     /**
+     *
+     * @var string
+     */
+    protected $subscription;
+
+    const SUBSCRIPTION_SCHOOL = 'school';
+
+    const SUBSCRIPTION_EXTENDED = 'extended';
+
+    const SUBSCRIPTION_BASIC = 'basic';
+
+    /**
+     *
+     * @param \Bokbasen\Auth\Login $auth            
+     * @param string $baseUrl            
+     */
+    public function __construct(Login $auth, $url = self::URL_PROD, $subscription = self::SUBSCRIPTION_EXTENDED, HttpClient $httpClient = null)
+    {
+        parent::__construct($auth, $url, $httpClient);
+        $this->subscription = $subscription;
+    }
+
+    /**
      * Create request object for the object report
      *
      * @param string $nextToken            
@@ -46,10 +71,15 @@ abstract class ExportBase extends BaseClient
     {
         $url = $this->url . $path;
         
+        $parameters = []
+
+        ;
+        if (! empty($this->subscription)) {
+            $parameters['subscription'] = $this->subscription;
+        }
+        
         if ($pageSize > 0) {
-            $parameters = [
-                'pagesize' => (int) $pageSize
-            ];
+            $parameters['pagesize'] = (int) $pageSize;
         }
         
         if (! is_null($nextToken)) {
