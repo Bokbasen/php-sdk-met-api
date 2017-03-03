@@ -25,7 +25,12 @@ class DefaultDownloadFileFormatter implements DownloadFileFormatterInterface
 
     public function getFilename(\SimpleXMLElement $objectReportXml)
     {
-        return $objectReportXml->ISBN13 . '-' . $objectReportXml->TYPE . $this->getFileExtension($objectReportXml->TYPE);
+        if (isset($objectReportXml->ISBN13) && ! empty($objectReportXml->ISBN13)) {
+            $ean = $objectReportXml->ISBN13;
+        } else {
+            $ean = $objectReportXml->EAN;
+        }
+        return $ean . '-' . $objectReportXml->TYPE . $this->getFileExtension($objectReportXml->TYPE);
     }
 
     protected function getFileExtension($type)
