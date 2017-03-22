@@ -93,7 +93,7 @@ while($morePages){
 ?>
 ```
 
-###Additional filters
+### Additional filters
 ```php
 <?php
 //Only download spesific types of objects
