@@ -4,7 +4,7 @@ SDK for working against Bokbasen's Metadata API. Currently only exports are supp
 The SDK assumes working knowledge of the API, see documentation: https://bokbasen.jira.com/wiki/spaces/api/pages/61964298/Metadata
 
 
-##Authentication
+## Authentication
 
 This SDK requires the Auth SDK to work, see [php-sdk-auth](https://github.com/Bokbasen/php-sdk-auth) for details on how to authenticate. 
 
@@ -16,9 +16,9 @@ All code examples below assumes that this variable exists:
  ?>
 ```
 
-##ONIX Exports
+## ONIX Exports
 
-###Create ONIX Export client
+### Create ONIX Export client
 
 Use auth object and set your subscription when creating the export object (subscription is based on your contract with Bokbasen. basic, extended or school)
 
@@ -30,14 +30,14 @@ $onixClient = new Onix($auth, Onix::URL_PROD, Onix::SUBSCRIPTION_EXTENDED);
 ```
 
 
-###Get ONIX for single ISBN
+### Get ONIX for single ISBN
 ```php
 <?php
 $onixAsString = $onixClient->getByISBN('9788276749557');
 ?>
 ```
 
-###Download ONIX to file based on a date
+### Download ONIX to file based on a date
 This is only used when you do not have a valid next token. Given filename will be appended until all pages are fetched (if $downloadAllPages === true)
 
 ```php
@@ -63,11 +63,11 @@ while($morePages){
 ?>
 ```
 
-##Object Exports
+## Object Exports
 
 Object reports has a similar process as ONIX download when it comes to paging. The SDK abstracts the report aspect and download the actual files for you.
 
-###Download all objects changes after a certain date
+### Download all objects changes after a certain date
 This is only used when you do not have a valid next token.
 
 ```php
@@ -77,7 +77,7 @@ $nextToken = $objectClient->downloadAfter(new \DateTime('2017-10-01'),'/pathForO
 ?>
 ```
 
-###Download objects to file based on a token
+### Download objects to file based on a token
 Use $nextToken to get all changes since last execution
 
 ```php
