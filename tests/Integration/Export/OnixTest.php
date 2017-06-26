@@ -1,6 +1,6 @@
 <?php
 namespace Bokbasen\Metadata\Tests\Integration\Export;
-
+use Bokbasen\ApiClient\Client as ApiClient;
 class OnixTest extends \Bokbasen\Metadata\Tests\Integration\Base
 {
 
@@ -8,7 +8,8 @@ class OnixTest extends \Bokbasen\Metadata\Tests\Integration\Base
     {
         $config = $this->getConfig();
         $auth = $this->getAuthObject();
-        $this->client = new \Bokbasen\Metadata\Export\Onix($this->auth, $config['metApiUrl'], \Bokbasen\Metadata\Export\Onix::SUBSCRIPTION_BASIC);
+        $apiClient = new ApiClient($auth, $config['metApiUrl']);
+        $this->client = new \Bokbasen\Metadata\Export\Onix($apiClient, \Bokbasen\Metadata\Export\Onix::SUBSCRIPTION_BASIC);
     }
 
     public function testOnixByISBN()

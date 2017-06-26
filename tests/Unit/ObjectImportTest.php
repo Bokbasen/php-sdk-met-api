@@ -3,11 +3,12 @@ namespace Bokbasen\Metadata\Tests\Unit;
 
 use Bokbasen\Auth\Login;
 use Http\Mock\Client;
+use Bokbasen\ApiClient\Client as ApiClient;
 
-class ObjectImportTest extends \PHPUnit_Framework_TestCase
+class ObjectImportTest extends \PHPUnit\Framework\TestCase
 {
 
-    protected function createMockAuthObject()
+    protected function createApiClientObject()
     {
         // Create mock of auth object
         $authClientMock = new Client();
@@ -25,6 +26,7 @@ class ObjectImportTest extends \PHPUnit_Framework_TestCase
             'password',
             null,
             null,
+            null,
             $authClientMock
         ])
             ->getMock();
@@ -34,12 +36,12 @@ class ObjectImportTest extends \PHPUnit_Framework_TestCase
             'Date' => gmdate('D, d M Y H:i:s e')
         ]);
         
-        return $mockedAuth;
+        return new ApiClient($mockedAuth,'https://www.api.boknett.no');
     }
 
     public function testImport()
     {
-        $authMoch = $this->createMockAuthObject();
+        $apiClient = $this->createApiClientObject();
         
         // Create mock client for order SDK
         $client = new Client();
@@ -49,15 +51,16 @@ class ObjectImportTest extends \PHPUnit_Framework_TestCase
         $mockedResponse->method('getStatusCode')->willReturn('201');
         
         $client->addResponse($mockedResponse);
+        $apiClient->setHttpClient($client);
         
-        $objectImportSdk = new \Bokbasen\Metadata\Import\Object($authMoch, null, $client);
+        $objectImportSdk = new \Bokbasen\Metadata\Import\Object($apiClient);
         $objectImportSdk->importObjectData('someData', '97888844545', \Bokbasen\Metadata\Import\Object::TYPE_PRODUCT_IMAGE);
         // No exception thrown, all ok
     }
 
     public function testFailedImport()
     {
-        $authMoch = $this->createMockAuthObject();
+        $apiClient = $this->createApiClientObject();
         $this->expectException(\Bokbasen\Metadata\Exceptions\BokbasenMetadataAPIException::class);
         // Create mock client for order SDK
         $client = new Client();
@@ -67,25 +70,25 @@ class ObjectImportTest extends \PHPUnit_Framework_TestCase
         $mockedResponse->method('getStatusCode')->willReturn('400');
         
         $client->addResponse($mockedResponse);
-        
-        $objectImportSdk = new \Bokbasen\Metadata\Import\Object($authMoch, null, $client);
+        $apiClient->setHttpClient($client);
+        $objectImportSdk = new \Bokbasen\Metadata\Import\Object($apiClient);
         $objectImportSdk->importObjectData('someData', '97888844545', \Bokbasen\Metadata\Import\Object::TYPE_PRODUCT_IMAGE);
     }
-    
+
     public function testFileDoesNotExistInput()
     {
-        $authMoch = $this->createMockAuthObject();
+        $apiClient = $this->createApiClientObject();
         $this->expectException(\Bokbasen\Metadata\Exceptions\BokbasenMetadataAPIException::class);
         // Create mock client for order SDK
         $client = new Client();
-    
+        
         $mockedResponse = $this->getMockBuilder('Psr\Http\Message\ResponseInterface')->getMock();
-    
+        
         $mockedResponse->method('getStatusCode')->willReturn('400');
-    
+        
         $client->addResponse($mockedResponse);
-    
-        $objectImportSdk = new \Bokbasen\Metadata\Import\Object($authMoch, null, $client);
+        $apiClient->setHttpClient($client);
+        $objectImportSdk = new \Bokbasen\Metadata\Import\Object($apiClient);
         $objectImportSdk->importFromPath('fileThatDoesNotExists.jpg', '97888844545', \Bokbasen\Metadata\Import\Object::TYPE_PRODUCT_IMAGE);
     }
 }

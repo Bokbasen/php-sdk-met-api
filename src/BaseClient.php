@@ -1,8 +1,8 @@
 <?php
 namespace Bokbasen\Metadata;
 
-use Bokbasen\Auth\Login;
-use Http\Client\HttpClient;
+use Bokbasen\ApiClient\Client;
+
 /**
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -24,22 +24,27 @@ use Http\Client\HttpClient;
  */
 abstract class BaseClient
 {
-    use \Bokbasen\Http\HttpMethodsTrait;
 
     const URL_PROD = 'https://api.boknett.no/metadata/';
 
     const URL_TEST = 'https://api.boknett.webbe.no/metadata/';
 
+    const URL_DEV = 'https://api.boknett.dev.webbe.no/metadata/';
+
     const AFTER_PARAMETER_DATE_FORMAT = 'YmdHis';
+
     /**
      *
-     * @param \Bokbasen\Auth\Login $auth            
-     * @param string $baseUrl            
+     * @var Client
      */
-    public function __construct(Login $auth, $url = self::URL_PROD, HttpClient $httpClient = null)
+    protected $apiClient;
+
+    /**
+     *
+     * @param Client $auth            
+     */
+    public function __construct(Client $apiClient)
     {
-        $this->auth = $auth;
-        $this->url = $url;
-        $this->setHttpClient($httpClient);
+        $this->apiClient = $apiClient;
     }
 }

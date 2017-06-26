@@ -1,7 +1,7 @@
 <?php
 namespace Bokbasen\Metadata\Tests\Integration;
 
-abstract class Base extends \PHPUnit_Framework_TestCase
+abstract class Base extends \PHPUnit\Framework\TestCase
 {
 
     /**
@@ -26,7 +26,7 @@ abstract class Base extends \PHPUnit_Framework_TestCase
     {
         $config = $this->getConfig();
         if (is_null($this->auth)) {
-            $this->auth = new \Bokbasen\Auth\Login($config['username'], $config['password'], null, $config['loginUrl']);
+            $this->auth = new \Bokbasen\Auth\Login($config['username'], $config['password'], $config['loginUrl']);
         }
         return $this->auth;
     }

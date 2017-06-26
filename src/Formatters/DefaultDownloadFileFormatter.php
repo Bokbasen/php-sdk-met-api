@@ -23,7 +23,7 @@ namespace Bokbasen\Metadata\Formatters;
 class DefaultDownloadFileFormatter implements DownloadFileFormatterInterface
 {
 
-    public function getFilename(\SimpleXMLElement $objectReportXml)
+    public function getFilename(\SimpleXMLElement $objectReportXml):string
     {
         if (isset($objectReportXml->ISBN13) && ! empty($objectReportXml->ISBN13)) {
             $ean = $objectReportXml->ISBN13;
@@ -33,7 +33,7 @@ class DefaultDownloadFileFormatter implements DownloadFileFormatterInterface
         return $ean . '-' . $objectReportXml->TYPE . $this->getFileExtension($objectReportXml->TYPE);
     }
 
-    protected function getFileExtension($type)
+    protected function getFileExtension($type):string
     {
         if ($type == \Bokbasen\Metadata\Export\Object::OBJECT_TYPE_AUDIO_SAMPLE) {
             $ext = '.mp3';

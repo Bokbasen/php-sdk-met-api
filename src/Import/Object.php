@@ -1,10 +1,10 @@
 <?php
 namespace Bokbasen\Metadata\Import;
 
+use \Psr\Http\Message\ResponseInterface;
 use Bokbasen\Metadata\BaseClient;
-use Bokbasen\Http\HttpRequestOptions;
+use Bokbasen\ApiClient\HttpRequestOptions;
 use Bokbasen\Metadata\Exceptions\BokbasenMetadataAPIException;
-use Http\Client\HttpClient;
 
 /**
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -50,36 +50,38 @@ class Object extends BaseClient
      * @param string $type            
      * @param string $productOwnerId            
      * @throws BokbasenMetadataAPIException
+     *
+     * @return ResponseInterface
      */
-    public function importObjectData($fileContent, $isbn, $type, $productOwnerId = null)
+    public function importObjectData($fileContent, string $isbn, string $type, ?string $productOwnerId = null): ResponseInterface
     {
         if (is_null($productOwnerId)) {
-            $url = sprintf($this->url . 'import/object/%s/%s/', $isbn, $type);
+            $relativePath = sprintf('/import/object/%s/%s/', $isbn, $type);
         } else {
-            $url = sprintf($this->url . 'import/object/%s/%s/%s/', $isbn, $productOwnerId, $type);
+            $relativePath = sprintf('/import/object/%s/%s/%s/', $isbn, $productOwnerId, $type);
         }
         
-        $request = $this->getMessageFactory()->createRequest('POST', $url, $this->makeObjectImportHeader($type), $fileContent);
+        $response = $this->apiClient->post($relativePath, $fileContent, HttpRequestOptions::CONTENT_TYPE_JPEG);
         
-        $response = $this->httpClient->sendRequest($request);
-        
-        if ($this->needReAuthentication($response)) {
-            $this->importObjectData($fileContent, $isbn, $type, $productOwnerId);
-        } elseif ($response->getStatusCode() != 201) {
+        if ($response->getStatusCode() != 201) {
             throw new BokbasenMetadataAPIException('Import failed for ISBN ' . $isbn . 'Error from server: ' . (string) $response->getBody());
         }
+        
+        return $response;
     }
 
     /**
      * Same as importObjectData except that you can specify a path to the file to import
      *
-     *      
+     *
      * @param string $pathToFile            
      * @param string $isbn            
      * @param string $type            
      * @param string $productOwnerId            
+     *
+     * @return ResponseInterface
      */
-    public function importFromPath($pathToFile, $isbn, $type, $productOwnerId = null)
+    public function importFromPath(string $pathToFile, string $isbn, string $type, ?string $productOwnerId = null): ResponseInterface
     {
         $resource = @fopen($pathToFile, 'r');
         
@@ -87,25 +89,5 @@ class Object extends BaseClient
             throw new BokbasenMetadataAPIException('could not open: ' . $pathToFile);
         }
         return $this->importObjectData($resource, $isbn, $type, $productOwnerId);
-    }
-
-    /**
-     * Make HTTP headers for object import
-     *
-     * @param string $type            
-     * @throws BokbasenMetadataAPIException
-     * @return array
-     */
-    protected function makeObjectImportHeader($type)
-    {
-        if (! isset(self::TYPE_CONTENT_MAPPING[$type])) {
-            throw new BokbasenMetadataAPIException('Invalid type provided: ' . $type);
-        } else {
-            $contentType = self::TYPE_CONTENT_MAPPING[$type];
-        }
-        
-        return $this->makeHeadersArray($this->auth, [
-            'Content-type' => $contentType
-        ]);
     }
 }

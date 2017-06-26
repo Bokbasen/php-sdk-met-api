@@ -32,19 +32,25 @@ class Onix extends ExportBase
 
     const PATH = 'export/onix';
 
-    public function getByISBN($isbn)
+    /**
+     * Get ONIX by ISBN ,returns XML as string
+     *
+     * @param string $isbn            
+     * @return string
+     */
+    public function getByISBN(string $isbn): string
     {
         $subscription = $this->subscription;
         $this->subscription = null;
-        $response = $this->httpClient->sendRequest($this->createRequest(null, null, null, self::PATH . '/' . $isbn));
+        $response = $this->apiClient->get(self::PATH . '/' . $isbn);
         $this->subscription = $subscription;
         
         return (string) $response->getBody();
     }
 
-    public function downloadNext($nextToken, $targetFolder, $pageSize = self::MAX_PAGE_SIZE)
+    public function downloadNext(string $nextToken, string $targetFolder, int $pageSize = self::MAX_PAGE_SIZE): bool
     {
-        $response = $this->httpClient->sendRequest($this->createRequest($nextToken, null, $pageSize, self::PATH));
+        $response = $this->executeGetRequest($nextToken, null, $pageSize, self::PATH);
         
         $this->saveOnixToDisk($response, $targetFolder);
         
@@ -53,9 +59,10 @@ class Onix extends ExportBase
         return $response->hasHeader('Link');
     }
 
-    public function downloadAfter(\DateTime $afterDate, $targetFilename, $downloadAllPages = true, $pageSize = self::MAX_PAGE_SIZE)
+    public function downloadAfter(\DateTime $afterDate, string $targetFilename, bool $downloadAllPages = true, int $pageSize = self::MAX_PAGE_SIZE): string
     {
-        $response = $this->httpClient->sendRequest($this->createRequest(null, $afterDate, $pageSize, self::PATH));
+        $response = $this->executeGetRequest(null, $afterDate, $pageSize, self::PATH);
+        
         $this->saveOnixToDisk($response, $targetFilename);
         $morePages = $response->hasHeader('Link');
         $this->lastNextToken = $response->getHeaderLine('Next');
@@ -69,14 +76,14 @@ class Onix extends ExportBase
         return $this->lastNextToken;
     }
 
-    protected function makeFilename($folder)
+    protected function makeFilename(string $folder): string
     {
         $filename = microtime(true) . '-onix';
         
         return $folder . $filename . '.xml';
     }
 
-    protected function saveOnixToDisk(ResponseInterface $response, $targetFolder)
+    protected function saveOnixToDisk(ResponseInterface $response, string $targetFolder): void
     {
         $targetFilename = $this->makeFilename($targetFolder);
         

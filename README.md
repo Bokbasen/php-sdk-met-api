@@ -6,13 +6,14 @@ The SDK assumes working knowledge of the API, see documentation: https://bokbase
 
 ## Authentication
 
-This SDK requires the Auth SDK to work, see [php-sdk-auth](https://github.com/Bokbasen/php-sdk-auth) for details on how to authenticate. 
+This SDK requires the Bokbasen API Client, see [php-api-client](https://github.com/Bokbasen/php-api-client) for details on how to implement. 
 
 All code examples below assumes that this variable exists: 
 
 ```php
 <?php
  $auth = new \Bokbasen\Auth\Login('username', 'password');
+ $client = new \BokbasenApiClient\Client($auth);
  ?>
 ```
 
@@ -25,7 +26,7 @@ Use auth object and set your subscription when creating the export object (subsc
 ```php
 <?php
 use Bokbasen\Metadata\Export\Onix;
-$onixClient = new Onix($auth, Onix::URL_PROD, Onix::SUBSCRIPTION_EXTENDED);
+$onixClient = new Onix($client, Onix::URL_PROD, Onix::SUBSCRIPTION_EXTENDED);
 ?>
 ```
 

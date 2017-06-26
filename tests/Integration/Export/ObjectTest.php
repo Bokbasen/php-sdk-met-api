@@ -1,6 +1,8 @@
 <?php
 namespace Bokbasen\Metadata\Tests\Integration\Export;
 
+use Bokbasen\ApiClient\Client as ApiClient;
+
 class ObjectTest extends \Bokbasen\Metadata\Tests\Integration\Base
 {
 
@@ -8,7 +10,8 @@ class ObjectTest extends \Bokbasen\Metadata\Tests\Integration\Base
     {
         $config = $this->getConfig();
         $auth = $this->getAuthObject();
-        $this->client = new \Bokbasen\Metadata\Export\Object($this->auth, $config['metApiUrl']);
+        $apiClient = new ApiClient($auth, $config['metApiUrl']);
+        $this->client = new \Bokbasen\Metadata\Export\Object($apiClient);
     }
 
     public function testObjectDownloadAfter()

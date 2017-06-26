@@ -59,9 +59,9 @@ class Object extends ExportBase
      * @param int $pageSize            
      * @return boolean
      */
-    public function downloadNext($nextToken, $targetPath, array $objectsTypesToDownload = [], array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, $pageSize = self::MAX_PAGE_SIZE)
+    public function downloadNext(string $nextToken, string $targetPath, array $objectsTypesToDownload = [], array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, int $pageSize = self::MAX_PAGE_SIZE):bool
     {
-        $response = $this->httpClient->sendRequest($this->createRequest($nextToken, null, $pageSize, self::PATH));
+        $response = $this->executeGetRequest($nextToken, null, $pageSize, self::PATH);
         
         $status = $this->downloadObjects($response, $objectsTypesToDownload, $targetPath, $isbnFilter, $filenameFormatter);
         
@@ -82,9 +82,9 @@ class Object extends ExportBase
      *
      * @return string
      */
-    public function downloadAfter(\DateTime $afterDate, $targetPath, array $objectsTypesToDownload = [], $downloadAllPages = true, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, $pageSize = self::MAX_PAGE_SIZE)
+    public function downloadAfter(\DateTime $afterDate, string $targetPath, array $objectsTypesToDownload = [], bool $downloadAllPages = true, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, int $pageSize = self::MAX_PAGE_SIZE):string 
     {
-        $response = $this->httpClient->sendRequest($this->createRequest(null, $afterDate, $pageSize, self::PATH));
+        $response = $this->executeGetRequest(null, $afterDate, $pageSize, self::PATH);
         $morePages = $this->downloadObjects($response, $objectsTypesToDownload, $targetPath, $isbnFilter, $filenameFormatter);
         $this->lastNextToken = $response->getHeaderLine('Next');
         
@@ -112,7 +112,7 @@ class Object extends ExportBase
      *
      * @return bool true if object report had books, false if object report was empty
      */
-    protected function downloadObjects(ResponseInterface $response, array $objectsTypesToDownload, $targetPath, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null)
+    protected function downloadObjects(ResponseInterface $response, array $objectsTypesToDownload, string $targetPath, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null):bool
     {
         $xml = new \SimpleXMLElement((string) $response->getBody());
         
@@ -134,9 +134,7 @@ class Object extends ExportBase
             $targetFilename = $filenameFormatter->getFilename($object);
             $url = (string) $object->REFERENCE;
             
-            // @todo this will put entire file into memory, replace with streams?
-            $request = $this->getMessageFactory()->createRequest('GET', $url, $this->makeHeadersArray($this->auth));
-            $response = $this->httpClient->sendRequest($request);
+            $response = $this->apiClient->executeHttpRequest('GET', [], null, $url);
             
             $status = file_put_contents($targetPath . $targetFilename, (string) $response->getBody());
             if ($status === false) {

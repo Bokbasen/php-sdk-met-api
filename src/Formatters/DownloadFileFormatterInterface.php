@@ -20,5 +20,5 @@ namespace Bokbasen\Metadata\Formatters;
  * @license https://opensource.org/licenses/MIT
  */
 interface DownloadFileFormatterInterface{
-    public function getFilename(\SimpleXMLElement $objectReportXml);
+    public function getFilename(\SimpleXMLElement $objectReportXml):string;
 }

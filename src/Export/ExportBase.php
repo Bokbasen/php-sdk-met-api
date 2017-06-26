@@ -2,8 +2,8 @@
 namespace Bokbasen\Metadata\Export;
 
 use Bokbasen\Metadata\BaseClient;
-use Bokbasen\Auth\Login;
-use Http\Client\HttpClient;
+use Psr\Http\Message\ResponseInterface;
+use Bokbasen\ApiClient\Client;
 
 /**
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -48,12 +48,12 @@ abstract class ExportBase extends BaseClient
 
     /**
      *
-     * @param \Bokbasen\Auth\Login $auth            
-     * @param string $baseUrl            
+     * @param Client $apiClient            
+     * @param string $subscription            
      */
-    public function __construct(Login $auth, $url = self::URL_PROD, $subscription = self::SUBSCRIPTION_EXTENDED, HttpClient $httpClient = null)
+    public function __construct(Client $apiClient, $subscription = self::SUBSCRIPTION_EXTENDED)
     {
-        parent::__construct($auth, $url, $httpClient);
+        parent::__construct($apiClient);
         $this->subscription = $subscription;
     }
 
@@ -65,15 +65,14 @@ abstract class ExportBase extends BaseClient
      * @param int $pageSize            
      * @param string $path            
      *
-     * @return \Psr\Http\Message\RequestInterface
+     * @return ResponseInterface
      */
-    protected function createRequest($nextToken, \DateTime $afterDate = null, $pageSize, $path)
+    protected function executeGetRequest($nextToken, \DateTime $afterDate = null, $pageSize, $path)
     {
-        $url = $this->url . $path;
+        $url = $path;
         
-        $parameters = []
-
-        ;
+        $parameters = [];
+        
         if (! empty($this->subscription)) {
             $parameters['subscription'] = $this->subscription;
         }
@@ -91,9 +90,7 @@ abstract class ExportBase extends BaseClient
             $url .= '?' . http_build_query($parameters);
         }
         
-        $request = $this->getMessageFactory()->createRequest('GET', $url, $this->makeHeadersArray($this->auth));
-        
-        return $request;
+        return  $this->apiClient->get($url, null);
     }
 
     /**
