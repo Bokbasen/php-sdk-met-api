@@ -2,7 +2,6 @@
 namespace Bokbasen\Metadata\Export;
 
 use Bokbasen\Metadata\Exceptions\BokbasenMetadataAPIException;
-use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
 use Bokbasen\Metadata\Formatters\DownloadFileFormatterInterface;
 use Bokbasen\Metadata\Formatters\DefaultDownloadFileFormatter;
@@ -30,17 +29,17 @@ use Bokbasen\Metadata\Formatters\DefaultDownloadFileFormatter;
 class Object extends ExportBase
 {
 
-    const OBJECT_TYPE_AUDIO_SAMPLE = 'ly';
+    public const OBJECT_TYPE_AUDIO_SAMPLE = 'ly';
 
-    const OBJECT_COVER_IMAGE_SMALL = 'ol';
+    public const OBJECT_COVER_IMAGE_SMALL = 'ol';
 
-    const OBJECT_COVER_IMAGE_LARGE = 'os';
+    public const OBJECT_COVER_IMAGE_LARGE = 'os';
 
-    const OBJECT_COVER_IMAGE_ORIGINAL = 'org';
+    public const OBJECT_COVER_IMAGE_ORIGINAL = 'org';
 
-    const MAX_PAGE_SIZE = 5000;
+    public const MAX_PAGE_SIZE = 5000;
 
-    const PATH = 'export/object';
+    protected const PATH = 'export/object';
 
     /**
      *
@@ -59,7 +58,7 @@ class Object extends ExportBase
      * @param int $pageSize            
      * @return boolean
      */
-    public function downloadNext(string $nextToken, string $targetPath, array $objectsTypesToDownload = [], array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, int $pageSize = self::MAX_PAGE_SIZE):bool
+    public function downloadNext(string $nextToken, string $targetPath, array $objectsTypesToDownload = [], array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, int $pageSize = self::MAX_PAGE_SIZE): bool
     {
         $response = $this->executeGetRequest($nextToken, null, $pageSize, self::PATH);
         
@@ -82,7 +81,7 @@ class Object extends ExportBase
      *
      * @return string
      */
-    public function downloadAfter(\DateTime $afterDate, string $targetPath, array $objectsTypesToDownload = [], bool $downloadAllPages = true, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, int $pageSize = self::MAX_PAGE_SIZE):string 
+    public function downloadAfter(\DateTime $afterDate, string $targetPath, array $objectsTypesToDownload = [], bool $downloadAllPages = true, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null, int $pageSize = self::MAX_PAGE_SIZE): string
     {
         $response = $this->executeGetRequest(null, $afterDate, $pageSize, self::PATH);
         $morePages = $this->downloadObjects($response, $objectsTypesToDownload, $targetPath, $isbnFilter, $filenameFormatter);
@@ -112,7 +111,7 @@ class Object extends ExportBase
      *
      * @return bool true if object report had books, false if object report was empty
      */
-    protected function downloadObjects(ResponseInterface $response, array $objectsTypesToDownload, string $targetPath, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null):bool
+    protected function downloadObjects(ResponseInterface $response, array $objectsTypesToDownload, string $targetPath, array $isbnFilter = [], DownloadFileFormatterInterface $filenameFormatter = null): bool
     {
         $xml = new \SimpleXMLElement((string) $response->getBody());
         

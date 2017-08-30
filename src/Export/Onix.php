@@ -2,7 +2,6 @@
 namespace Bokbasen\Metadata\Export;
 
 use Bokbasen\Metadata\Exceptions\BokbasenMetadataAPIException;
-use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -28,9 +27,9 @@ use Psr\Http\Message\ResponseInterface;
 class Onix extends ExportBase
 {
 
-    const MAX_PAGE_SIZE = 1000;
+    public const MAX_PAGE_SIZE = 1000;
 
-    const PATH = 'export/onix';
+    protected const PATH = 'export/onix';
 
     /**
      * Get ONIX by ISBN ,returns XML as string
@@ -48,9 +47,41 @@ class Onix extends ExportBase
         return (string) $response->getBody();
     }
 
+    /**
+     * Execute metadata request with next-token, returns response object
+     *
+     * @param string $nextToken            
+     * @param int $pageSize            
+     * @return ResponseInterface
+     */
+    public function getNext(string $nextToken, int $pageSize = self::MAX_PAGE_SIZE): ResponseInterface
+    {
+        return $this->executeGetRequest($nextToken, null, $pageSize, self::PATH);
+    }
+
+    /**
+     * Execute metadata request with after parameter, returns response object
+     *
+     * @param \DateTime $afterDate            
+     * @param int $pageSize            
+     * @return ResponseInterface
+     */
+    public function getAfter(\DateTime $afterDate, int $pageSize = self::MAX_PAGE_SIZE): ResponseInterface
+    {
+        return $this->executeGetRequest(null, $afterDate, $pageSize, self::PATH);
+    }
+
+    /**
+     * Download XML to file based on next token, returns true if there are more pages to iterate over
+     *
+     * @param string $nextToken            
+     * @param string $targetFolder            
+     * @param int $pageSize            
+     * @return bool
+     */
     public function downloadNext(string $nextToken, string $targetFolder, int $pageSize = self::MAX_PAGE_SIZE): bool
     {
-        $response = $this->executeGetRequest($nextToken, null, $pageSize, self::PATH);
+        $response = $this->getNext($nextToken, $pageSize);
         
         $this->saveOnixToDisk($response, $targetFolder);
         
@@ -59,10 +90,18 @@ class Onix extends ExportBase
         return $response->hasHeader('Link');
     }
 
+    /**
+     * Download XML to file based on after DateTime, returns token to use with downloadNext to iterate over further pages.
+     *
+     * @param \DateTime $afterDate            
+     * @param string $targetFilename            
+     * @param bool $downloadAllPages            
+     * @param int $pageSize            
+     * @return string
+     */
     public function downloadAfter(\DateTime $afterDate, string $targetFilename, bool $downloadAllPages = true, int $pageSize = self::MAX_PAGE_SIZE): string
     {
-        $response = $this->executeGetRequest(null, $afterDate, $pageSize, self::PATH);
-        
+        $response = $this->getAfter($afterDate, $pageSize);
         $this->saveOnixToDisk($response, $targetFilename);
         $morePages = $response->hasHeader('Link');
         $this->lastNextToken = $response->getHeaderLine('Next');

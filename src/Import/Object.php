@@ -29,11 +29,11 @@ use Bokbasen\Metadata\Exceptions\BokbasenMetadataAPIException;
 class Object extends BaseClient
 {
 
-    const TYPE_PRODUCT_IMAGE = 'productimage';
+    public const TYPE_PRODUCT_IMAGE = 'productimage';
 
-    const TYPE_AUDIO_SAMPLE = 'audiosample';
+    public const TYPE_AUDIO_SAMPLE = 'audiosample';
 
-    const TYPE_TABLE_OF_CONTENT = 'tableofcontents';
+    public const TYPE_TABLE_OF_CONTENT = 'tableofcontents';
 
     const TYPE_CONTENT_MAPPING = [
         self::TYPE_AUDIO_SAMPLE => HttpRequestOptions::CONTENT_TYPE_AUDIO_MPEG,

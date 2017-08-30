@@ -12,9 +12,12 @@ All code examples below assumes that this variable exists:
 
 ```php
 <?php
- $auth = new \Bokbasen\Auth\Login('username', 'password');
- $client = new \BokbasenApiClient\Client($auth);
- ?>
+use Bokbasen\Auth\Login;
+use Bokbasen\ApiClient\Client;
+
+$auth = Login('username', 'password');
+$client = new Client($auth);
+?>
 ```
 
 ## ONIX Exports
@@ -29,7 +32,6 @@ use Bokbasen\Metadata\Export\Onix;
 $onixClient = new Onix($client, Onix::URL_PROD, Onix::SUBSCRIPTION_EXTENDED);
 ?>
 ```
-
 
 ### Get ONIX for single ISBN
 ```php
@@ -48,7 +50,7 @@ $nextToken = $onixClient->downloadAfter(new \DateTime('2017-01-01'),'/onixFolder
 ?>
 ```
 
-###Download ONIX to file based on a token
+### Download ONIX to file based on a token
 Use $nextToken to get all changes since last execution
 
 ```php
@@ -61,6 +63,20 @@ while($morePages){
 }
 
 //Save next token for later use
+?>
+```
+
+### Get XML as string
+
+If you do not want to use the SDK to write files for you, use the following methods to get the full Response object for each request. This means you need to implement the header parsing logic yourself.
+
+```php
+<?php
+$response = $onixClient->getAfter(new \DateTime('2017-01-01')); 
+//Implement your own parsing here and get token from header
+
+//Use token to get more pages
+$response = $onixClient->getNext($token); 
 ?>
 ```
 

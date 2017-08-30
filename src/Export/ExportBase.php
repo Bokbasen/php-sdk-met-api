@@ -40,11 +40,11 @@ abstract class ExportBase extends BaseClient
      */
     protected $subscription;
 
-    const SUBSCRIPTION_SCHOOL = 'school';
+    public const SUBSCRIPTION_SCHOOL = 'school';
 
-    const SUBSCRIPTION_EXTENDED = 'extended';
+    public const SUBSCRIPTION_EXTENDED = 'extended';
 
-    const SUBSCRIPTION_BASIC = 'basic';
+    public const SUBSCRIPTION_BASIC = 'basic';
 
     /**
      *
@@ -67,7 +67,7 @@ abstract class ExportBase extends BaseClient
      *
      * @return ResponseInterface
      */
-    protected function executeGetRequest($nextToken, \DateTime $afterDate = null, $pageSize, $path)
+    protected function executeGetRequest($nextToken, \DateTime $afterDate = null, $pageSize, $path): ResponseInterface
     {
         $url = $path;
         
@@ -90,7 +90,7 @@ abstract class ExportBase extends BaseClient
             $url .= '?' . http_build_query($parameters);
         }
         
-        return  $this->apiClient->get($url, null);
+        return $this->apiClient->get($url, null);
     }
 
     /**
@@ -98,7 +98,7 @@ abstract class ExportBase extends BaseClient
      *
      * @return string
      */
-    public function getLastNextToken()
+    public function getLastNextToken():string
     {
         return $this->lastNextToken;
     }
