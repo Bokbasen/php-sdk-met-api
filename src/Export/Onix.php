@@ -29,7 +29,7 @@ class Onix extends ExportBase
 
     public const MAX_PAGE_SIZE = 1000;
 
-    protected const PATH = 'export/onix';
+    protected const PATH = 'metadata/export/onix';
 
     /**
      * Get ONIX by ISBN ,returns XML as string
