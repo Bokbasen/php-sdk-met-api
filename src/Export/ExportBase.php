@@ -98,7 +98,7 @@ abstract class ExportBase extends BaseClient
      *
      * @return string
      */
-    public function getLastNextToken():string
+    public function getLastNextToken():?string
     {
         return $this->lastNextToken;
     }
