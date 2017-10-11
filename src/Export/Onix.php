@@ -56,7 +56,10 @@ class Onix extends ExportBase
      */
     public function getNext(string $nextToken, int $pageSize = self::MAX_PAGE_SIZE): ResponseInterface
     {
-        return $this->executeGetRequest($nextToken, null, $pageSize, self::PATH);
+        $response = $this->executeGetRequest($nextToken, null, $pageSize, self::PATH);
+        $this->lastNextToken = $response->getHeaderLine('Next');
+        
+        return $response;
     }
 
     /**
@@ -68,7 +71,9 @@ class Onix extends ExportBase
      */
     public function getAfter(\DateTime $afterDate, int $pageSize = self::MAX_PAGE_SIZE): ResponseInterface
     {
-        return $this->executeGetRequest(null, $afterDate, $pageSize, self::PATH);
+        $response = $this->executeGetRequest(null, $afterDate, $pageSize, self::PATH);
+        $this->lastNextToken = $response->getHeaderLine('Next');
+        return $response;
     }
 
     /**
@@ -84,8 +89,6 @@ class Onix extends ExportBase
         $response = $this->getNext($nextToken, $pageSize);
         
         $this->saveOnixToDisk($response, $targetFolder);
-        
-        $this->lastNextToken = $response->getHeaderLine('Next');
         
         return $response->hasHeader('Link');
     }
@@ -104,7 +107,6 @@ class Onix extends ExportBase
         $response = $this->getAfter($afterDate, $pageSize);
         $this->saveOnixToDisk($response, $targetFilename);
         $morePages = $response->hasHeader('Link');
-        $this->lastNextToken = $response->getHeaderLine('Next');
         
         if ($downloadAllPages && $morePages) {
             while ($morePages) {
