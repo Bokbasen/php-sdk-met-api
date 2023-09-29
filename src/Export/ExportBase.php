@@ -90,7 +90,7 @@ abstract class ExportBase extends BaseClient
             $url .= '?' . http_build_query($parameters);
         }
         
-        return $this->apiClient->get($url, null);
+        return $this->apiClient->get($url, []);
     }
 
     /**
